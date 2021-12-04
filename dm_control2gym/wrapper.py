@@ -1,6 +1,6 @@
 from gym import core, spaces
 from dm_control import suite
-from dm_control.rl import specs
+from dm_env import specs
 from gym.utils import seeding
 import gym
 from dm_control2gym.viewer import DmControlViewer
@@ -20,9 +20,9 @@ def convertSpec2Space(spec, clip_inf=False):
         return DmcDiscrete(spec.minimum, spec.maximum)
     else:
         # Box
-        if type(spec) is specs.ArraySpec:
+        if type(spec) is specs.Array:
             return spaces.Box(-np.inf, np.inf, shape=spec.shape)
-        elif type(spec) is specs.BoundedArraySpec:
+        elif type(spec) is specs.BoundedArray:
             _min = spec.minimum
             _max = spec.maximum
             if clip_inf:
@@ -55,13 +55,9 @@ def convertObservation(spec_obs):
         return list(spec_obs.values())[0]
     else:
         # concatentation
-        numdim = sum([np.int(np.prod(spec_obs[key].shape)) for key in spec_obs])
-        space_obs = np.zeros((numdim,))
-        i = 0
-        for key in spec_obs:
-            space_obs[i:i+np.prod(spec_obs[key].shape)] = spec_obs[key].ravel()
-            i += np.prod(spec_obs[key].shape)
-        return space_obs
+        observation = [spec_obs[key] if isinstance(spec_obs[key], np.ndarray) else [spec_obs[key]] for key in spec_obs]
+        observation = np.concatenate(observation)
+        return observation
 
 class DmControlWrapper(core.Env):
 
