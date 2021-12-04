@@ -88,11 +88,11 @@ class DmControlWrapper(core.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def _reset(self):
+    def reset(self):
         self.timestep = self.dmcenv.reset()
         return self.getObservation()
 
-    def _step(self, a):
+    def step(self, a):
 
         if type(self.action_space) == DmcDiscrete:
             a += self.action_space.offset
